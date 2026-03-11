@@ -2,7 +2,7 @@ import React from 'react';
 import { X, Edit, Trash2 } from 'lucide-react';
 import StatusBadge from './StatusBadge';
 
-const ClientDetailsModal = ({ isOpen, onClose, client, onEdit, onDelete }) => {
+const ClientDetailsModal = ({ isOpen, onClose, client, onEdit, onDelete, onUpdateMonthsPaid }) => {
     if (!isOpen || !client) return null;
 
     const monthly = (client.payment15.amount + client.payment30.amount);
@@ -62,9 +62,23 @@ const ClientDetailsModal = ({ isOpen, onClose, client, onEdit, onDelete }) => {
                             <p className="text-xs font-semibold text-pink-500 uppercase tracking-wider mb-1">Target Months</p>
                             <p className="font-medium text-rose-800">{targetMonths}</p>
                         </div>
-                        <div>
+                        <div className="flex flex-col">
                             <p className="text-xs font-semibold text-pink-500 uppercase tracking-wider mb-1">Months Paid</p>
-                            <p className="font-medium text-rose-500">{monthsPaid}</p>
+                            <div className="flex items-center gap-3">
+                                <button
+                                    onClick={() => onUpdateMonthsPaid(client.id, monthsPaid - 1)}
+                                    className="w-6 h-6 flex items-center justify-center rounded bg-pink-100 text-rose-600 hover:bg-rose-200 transition-colors"
+                                >
+                                    -
+                                </button>
+                                <p className="font-medium text-rose-500 w-4 text-center">{monthsPaid}</p>
+                                <button
+                                    onClick={() => onUpdateMonthsPaid(client.id, monthsPaid + 1)}
+                                    className="w-6 h-6 flex items-center justify-center rounded bg-pink-100 text-rose-600 hover:bg-rose-200 transition-colors"
+                                >
+                                    +
+                                </button>
+                            </div>
                         </div>
                     </div>
 

@@ -38,7 +38,10 @@ function App() {
 
   // Client Details Modal state
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
-  const [selectedClient, setSelectedClient] = useState(null);
+  const [selectedClientHistory, setSelectedClientHistory] = useState(null);
+
+  // Dashboard row selection
+  const [selectedDashboardClientId, setSelectedDashboardClientId] = useState(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -75,8 +78,8 @@ function App() {
     await supabase.auth.signOut();
   };
 
-  const handleSelectClient = (client) => {
-    setSelectedClient(client);
+  const handleSelectClientHistory = (client) => {
+    setSelectedClientHistory(client);
     setIsDetailsModalOpen(true);
   };
 
@@ -122,6 +125,49 @@ function App() {
       .from('clients')
       .update({ payment30: newPayment30, status: newStatus })
       .eq('id', clientId);
+  };
+
+  const handleToggleItemReceived = async (clientId) => {
+    const client = clients.find(c => c.id === clientId);
+    if (!client) return;
+
+    const newIsItemReceived = !client.isItemReceived;
+    setClients(prev => prev.map(c => c.id === clientId ? { ...c, isItemReceived: newIsItemReceived } : c));
+    await supabase.from('clients').update({ isItemReceived: newIsItemReceived }).eq('id', clientId);
+  };
+
+  const handleSavePayment = async (clientId) => {
+    const client = clients.find(c => c.id === clientId);
+    if (!client || client.status !== 'Paid') return;
+
+    const newMonthsPaid = (client.monthsPaid || 0) + 1;
+    const resetPayment15 = { ...client.payment15, paid: false };
+    const resetPayment30 = { ...client.payment30, paid: false };
+    const newStatus = "Unpaid";
+
+    setClients(prev => prev.map(c => c.id === clientId ? {
+      ...c,
+      monthsPaid: newMonthsPaid,
+      payment15: resetPayment15,
+      payment30: resetPayment30,
+      status: newStatus
+    } : c));
+
+    await supabase
+      .from('clients')
+      .update({
+        monthsPaid: newMonthsPaid,
+        payment15: resetPayment15,
+        payment30: resetPayment30,
+        status: newStatus
+      })
+      .eq('id', clientId);
+  };
+
+  const handleUpdateMonthsPaid = async (clientId, newMonthsPaid) => {
+    if (newMonthsPaid < 0) return;
+    setClients(prev => prev.map(c => c.id === clientId ? { ...c, monthsPaid: newMonthsPaid } : c));
+    await supabase.from('clients').update({ monthsPaid: newMonthsPaid }).eq('id', clientId);
   };
 
   const handleExportCSV = () => {
@@ -177,6 +223,10 @@ function App() {
         .delete()
         .eq('id', clientToDelete.id);
 
+      if (selectedDashboardClientId === clientToDelete.id) {
+        setSelectedDashboardClientId(null);
+      }
+
       setClientToDelete(null);
     }
   };
@@ -203,8 +253,8 @@ function App() {
         .update(updatedClientData)
         .eq('id', editingClient.id);
 
-      if (selectedClient && selectedClient.id === editingClient.id) {
-        setSelectedClient({ ...selectedClient, ...updatedClientData });
+      if (selectedClientHistory && selectedClientHistory.id === editingClient.id) {
+        setSelectedClientHistory({ ...selectedClientHistory, ...updatedClientData });
       }
 
     } else {
@@ -286,20 +336,26 @@ function App() {
                 setMonthFilter={setMonthFilter}
                 onAddClient={handleAddClient}
                 onExport={handleExportCSV}
+                selectedDashboardClient={clients.find(c => c.id === selectedDashboardClientId)}
+                onEditDashboardClient={() => clients.find(c => c.id === selectedDashboardClientId) && handleEditClient(clients.find(c => c.id === selectedDashboardClientId))}
+                onDeleteDashboardClient={() => clients.find(c => c.id === selectedDashboardClientId) && handleDeleteRequest(clients.find(c => c.id === selectedDashboardClientId))}
               />
 
               <DashboardTable
                 clients={filteredClients}
+                selectedClientId={selectedDashboardClientId}
+                onSelectRow={setSelectedDashboardClientId}
                 onTogglePayment15={handleTogglePayment15}
                 onTogglePayment30={handleTogglePayment30}
-                onSelectClient={handleSelectClient}
+                onSavePayment={handleSavePayment}
+                onToggleItemReceived={handleToggleItemReceived}
               />
             </div>
           ) : (
             <div className="max-w-7xl mx-auto">
               <HistoryTable
                 clients={clients}
-                onSelectClient={handleSelectClient}
+                onSelectClient={handleSelectClientHistory}
               />
             </div>
           )}
@@ -323,9 +379,10 @@ function App() {
       <ClientDetailsModal
         isOpen={isDetailsModalOpen}
         onClose={() => setIsDetailsModalOpen(false)}
-        client={selectedClient}
+        client={selectedClientHistory}
         onEdit={handleEditClient}
         onDelete={handleDeleteRequest}
+        onUpdateMonthsPaid={handleUpdateMonthsPaid}
       />
     </div>
   );

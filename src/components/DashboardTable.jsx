@@ -1,13 +1,22 @@
 import React from 'react';
 import StatusBadge from './StatusBadge';
 
-const DashboardTable = ({ clients, onTogglePayment15, onTogglePayment30, onSelectClient }) => {
+const DashboardTable = ({
+    clients,
+    selectedClientId,
+    onSelectRow,
+    onTogglePayment15,
+    onTogglePayment30,
+    onSavePayment,
+    onToggleItemReceived
+}) => {
     return (
         <div className="bg-white rounded-xl shadow-sm border border-pink-200 overflow-hidden">
             <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm text-rose-600">
                     <thead className="bg-pink-50 text-rose-900 font-semibold border-b border-pink-200">
                         <tr>
+                            <th className="px-6 py-4 whitespace-nowrap text-center">Select</th>
                             <th className="px-6 py-4 whitespace-nowrap text-center">Date</th>
                             <th className="px-6 py-4 whitespace-nowrap text-center">Client Name</th>
                             <th className="px-6 py-4 whitespace-nowrap text-center">Items</th>
@@ -21,7 +30,7 @@ const DashboardTable = ({ clients, onTogglePayment15, onTogglePayment30, onSelec
                     <tbody className="divide-y divide-slate-200">
                         {clients.length === 0 ? (
                             <tr>
-                                <td colSpan="8" className="px-6 py-12 text-center text-pink-500">
+                                <td colSpan="9" className="px-6 py-12 text-center text-pink-500">
                                     No clients found.
                                 </td>
                             </tr>
@@ -29,11 +38,31 @@ const DashboardTable = ({ clients, onTogglePayment15, onTogglePayment30, onSelec
                             clients.map((client, index) => (
                                 <tr
                                     key={client.id}
-                                    className={`hover:bg-pink-50/80 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-pink-50/40'}`}
+                                    className={`hover:bg-pink-50/80 transition-colors ${selectedClientId === client.id ? 'bg-pink-100/60' : (index % 2 === 0 ? 'bg-white' : 'bg-pink-50/40')}`}
                                 >
+                                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                                        <input
+                                            type="radio"
+                                            name="dashboardSelectClient"
+                                            checked={selectedClientId === client.id}
+                                            onChange={() => onSelectRow(client.id)}
+                                            className="w-4 h-4 text-rose-500 bg-white border-pink-200 focus:ring-rose-500 cursor-pointer accent-rose-500"
+                                        />
+                                    </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-center">{client.date}</td>
                                     <td className="px-6 py-4 whitespace-nowrap font-medium text-rose-900 text-center">{client.name}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-center">{client.items}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                                        <div className="flex items-center justify-center gap-2">
+                                            <span>{client.items}</span>
+                                            <input
+                                                type="checkbox"
+                                                checked={client.isItemReceived || false}
+                                                onChange={() => onToggleItemReceived(client.id)}
+                                                className="w-4 h-4 text-rose-500 rounded focus:ring-rose-500 cursor-pointer accent-rose-500"
+                                                title="Mark as received"
+                                            />
+                                        </div>
+                                    </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-center text-pink-500">{client.month}</td>
 
                                     {/* 15-Day Payment Toggle */}
@@ -73,12 +102,16 @@ const DashboardTable = ({ clients, onTogglePayment15, onTogglePayment30, onSelec
                                     </td>
 
                                     <td className="px-6 py-4 whitespace-nowrap text-center">
-                                        <button
-                                            onClick={() => onSelectClient(client)}
-                                            className="px-4 py-2 bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-400 hover:text-white hover:border-rose-400 font-medium text-sm rounded-lg transition-colors shadow-sm cursor-pointer"
-                                        >
-                                            Select
-                                        </button>
+                                        {client.status === 'Paid' ? (
+                                            <button
+                                                onClick={() => onSavePayment(client.id)}
+                                                className="px-4 py-2 bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-500 hover:text-white font-medium text-sm rounded-lg shadow-sm transition-colors cursor-pointer"
+                                            >
+                                                Save
+                                            </button>
+                                        ) : (
+                                            <span className="text-pink-300 text-xs font-semibold">-</span>
+                                        )}
                                     </td>
                                 </tr>
                             ))
