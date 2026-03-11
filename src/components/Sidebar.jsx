@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, History, LogOut, FileCheck } from 'lucide-react';
+import { LayoutDashboard, History, LogOut, FileCheck, LineChart, Archive } from 'lucide-react';
 
 const Sidebar = ({ activeTab, setActiveTab, onLogout }) => {
     return (
@@ -22,10 +22,16 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout }) => {
                         <LayoutDashboard className="w-5 h-5" /> Payment Management
                     </button>
                     <button
+                        onClick={() => setActiveTab('progress')}
+                        className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg font-medium transition-colors cursor-pointer ${activeTab === 'progress' ? 'bg-rose-400 text-white shadow-sm' : 'hover:bg-rose-900 hover:text-white'}`}
+                    >
+                        <LineChart className="w-5 h-5" /> Client Progress
+                    </button>
+                    <button
                         onClick={() => setActiveTab('history')}
                         className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg font-medium transition-colors cursor-pointer ${activeTab === 'history' ? 'bg-rose-400 text-white shadow-sm' : 'hover:bg-rose-900 hover:text-white'}`}
                     >
-                        <History className="w-5 h-5" /> History
+                        <Archive className="w-5 h-5" /> Completed History
                     </button>
                     <button
                         onClick={() => setActiveTab('logs')}

@@ -4,6 +4,7 @@ import Sidebar from './components/Sidebar';
 import DashboardSummary from './components/DashboardSummary';
 import DashboardFilters from './components/DashboardFilters';
 import DashboardTable from './components/DashboardTable';
+import ClientProgressTable from './components/ClientProgressTable';
 import HistoryTable from './components/HistoryTable';
 import PaymentLogsTable from './components/PaymentLogsTable';
 import ClientModal from './components/ClientModal';
@@ -109,11 +110,18 @@ function App() {
     });
   }, [clients, searchTerm, monthFilter]);
 
+  const filteredProgressClients = useMemo(() => {
+    return clients.filter(client => {
+      if (client.status === 'Completed') return false;
+      const matchesSearch = client.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesMonth = monthFilter === 'All Months' || client.month === monthFilter;
+      return matchesSearch && matchesMonth;
+    });
+  }, [clients, searchTerm, monthFilter]);
+
   const filteredHistoryClients = useMemo(() => {
     return clients.filter(client => {
-      // Strictly only show completed/archived clients here
       if (client.status !== 'Completed') return false;
-
       const matchesSearch = client.name.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesMonth = monthFilter === 'All Months' || client.month === monthFilter;
       return matchesSearch && matchesMonth;
@@ -389,7 +397,8 @@ function App() {
           <div className="flex items-center gap-4">
             <div className="flex items-center text-sm font-medium text-pink-500">
               {activeTab === 'dashboard' && 'Administrator Dashboard'}
-              {activeTab === 'history' && 'Client Payment History'}
+              {activeTab === 'progress' && 'Client Progress Overview'}
+              {activeTab === 'history' && 'Completed Account History'}
               {activeTab === 'logs' && 'Confirmed Payment Logs'}
             </div>
             <button onClick={handleLogout} className="md:hidden p-2 text-pink-300 hover:text-rose-500 hover:bg-rose-50 rounded-full transition-colors">
@@ -426,6 +435,21 @@ function App() {
                 onToggleItemReceived={handleToggleItemReceived}
               />
             </div>
+          ) : activeTab === 'progress' ? (
+            <div className="max-w-7xl mx-auto space-y-6">
+              <DashboardFilters
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                monthFilter={monthFilter}
+                setMonthFilter={setMonthFilter}
+                onExport={handleExportCSV}
+                showAddButton={false}
+              />
+              <ClientProgressTable
+                clients={filteredProgressClients}
+                onSelectClient={handleSelectClientHistory}
+              />
+            </div>
           ) : activeTab === 'history' ? (
             <div className="max-w-7xl mx-auto space-y-6">
               <DashboardFilters
@@ -436,10 +460,7 @@ function App() {
                 onExport={handleExportCSV}
                 showAddButton={false}
               />
-              <HistoryTable
-                clients={filteredHistoryClients}
-                onSelectClient={handleSelectClientHistory}
-              />
+              <HistoryTable clients={filteredHistoryClients} />
             </div>
           ) : (
             <div className="max-w-7xl mx-auto space-y-6">
