@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-primary-50: #fff0f5;
+  --color-primary-100: #ffe4e1;
+  --color-primary-500: #ffb6c1;
+  --color-primary-600: #ff69b4;
+  --color-primary-700: #db7093;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.bg-pink-swirl {
+  background-color: #ffe6eb;
+  background-image:
+    radial-gradient(at 0% 0%, hsla(350, 100%, 95%, 1) 0, transparent 50%),
+    radial-gradient(at 50% 0%, hsla(340, 100%, 93%, 1) 0, transparent 50%),
+    radial-gradient(at 100% 0%, hsla(350, 100%, 95%, 1) 0, transparent 50%),
+    radial-gradient(at 0% 100%, hsla(330, 100%, 91%, 0.8) 0, transparent 50%),
+    radial-gradient(at 100% 100%, hsla(340, 100%, 94%, 1) 0, transparent 50%);
+  background-size: 150% 150%;
+  animation: bg-swirl-move 15s ease infinite alternate;
+}
+
+@keyframes bg-swirl-move {
+  0% {
+    background-position: 0% 0%;
+  }
+
+  100% {
+    background-position: 100% 100%;
+  }
+}
