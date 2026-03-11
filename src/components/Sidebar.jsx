@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, History, LogOut } from 'lucide-react';
+import { LayoutDashboard, History, LogOut, FileCheck } from 'lucide-react';
 
 const Sidebar = ({ activeTab, setActiveTab, onLogout }) => {
     return (
@@ -9,7 +9,7 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout }) => {
                     <div className="w-8 h-8 rounded-lg bg-rose-400 flex items-center justify-center font-bold text-lg shadow-sm">
                         P
                     </div>
-                    <span className="font-bold text-xl tracking-tight leading-none mt-1">Paluwagan</span>
+                    <span className="font-bold text-xl tracking-tight leading-none mt-1">ROSCA</span>
                 </div>
             </div>
             <div className="p-4 flex-1">
@@ -19,13 +19,19 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout }) => {
                         onClick={() => setActiveTab('dashboard')}
                         className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg font-medium transition-colors cursor-pointer ${activeTab === 'dashboard' ? 'bg-rose-400 text-white shadow-sm' : 'hover:bg-rose-900 hover:text-white'}`}
                     >
-                        <LayoutDashboard className="w-5 h-5" /> Dashboard
+                        <LayoutDashboard className="w-5 h-5" /> Payment Management
                     </button>
                     <button
                         onClick={() => setActiveTab('history')}
                         className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg font-medium transition-colors cursor-pointer ${activeTab === 'history' ? 'bg-rose-400 text-white shadow-sm' : 'hover:bg-rose-900 hover:text-white'}`}
                     >
                         <History className="w-5 h-5" /> History
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('logs')}
+                        className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg font-medium transition-colors cursor-pointer ${activeTab === 'logs' ? 'bg-rose-400 text-white shadow-sm' : 'hover:bg-rose-900 hover:text-white'}`}
+                    >
+                        <FileCheck className="w-5 h-5" /> Payment Logs
                     </button>
                 </nav>
             </div>

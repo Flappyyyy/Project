@@ -5,6 +5,7 @@ import DashboardSummary from './components/DashboardSummary';
 import DashboardFilters from './components/DashboardFilters';
 import DashboardTable from './components/DashboardTable';
 import HistoryTable from './components/HistoryTable';
+import PaymentLogsTable from './components/PaymentLogsTable';
 import ClientModal from './components/ClientModal';
 import DeleteConfirmationModal from './components/DeleteConfirmationModal';
 import ClientDetailsModal from './components/ClientDetailsModal';
@@ -25,6 +26,7 @@ function App() {
   // App UI States
   const [activeTab, setActiveTab] = useState('dashboard');
   const [clients, setClients] = useState([]);
+  const [paymentLogs, setPaymentLogs] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [monthFilter, setMonthFilter] = useState('All Months');
 
@@ -66,12 +68,19 @@ function App() {
   }, [session]);
 
   const fetchClients = async () => {
-    const { data, error } = await supabase
+    const { data: clientsData } = await supabase
       .from('clients')
       .select('*')
       .order('created_at', { ascending: false });
 
-    if (data) setClients(data);
+    if (clientsData) setClients(clientsData);
+
+    const { data: logsData } = await supabase
+      .from('payment_logs')
+      .select('*')
+      .order('date_saved', { ascending: false });
+
+    if (logsData) setPaymentLogs(logsData);
   };
 
   const handleLogout = async () => {
@@ -153,6 +162,29 @@ function App() {
       status: newStatus
     } : c));
 
+    // Create new log record
+    const newLog = {
+      user_id: session.user.id,
+      client_id: client.id,
+      client_name: client.name,
+      items: client.items,
+      month_paid_for: client.month,
+      payment15_amount: client.payment15,
+      payment30_amount: client.payment30,
+      status: 'Paid'
+    };
+
+    // Insert Log
+    const { data: insertedLog } = await supabase
+      .from('payment_logs')
+      .insert([newLog])
+      .select();
+
+    if (insertedLog && insertedLog.length > 0) {
+      setPaymentLogs(prev => [insertedLog[0], ...prev]);
+    }
+
+    // Update Client Status
     await supabase
       .from('clients')
       .update({
@@ -315,7 +347,9 @@ function App() {
           </div>
           <div className="flex items-center gap-4">
             <div className="flex items-center text-sm font-medium text-pink-500">
-              {activeTab === 'dashboard' ? 'Administrator Dashboard' : 'Client Payment History'}
+              {activeTab === 'dashboard' && 'Administrator Dashboard'}
+              {activeTab === 'history' && 'Client Payment History'}
+              {activeTab === 'logs' && 'Confirmed Payment Logs'}
             </div>
             <button onClick={handleLogout} className="md:hidden p-2 text-pink-300 hover:text-rose-500 hover:bg-rose-50 rounded-full transition-colors">
               <LogOut className="w-5 h-5" />
@@ -351,12 +385,16 @@ function App() {
                 onToggleItemReceived={handleToggleItemReceived}
               />
             </div>
-          ) : (
+          ) : activeTab === 'history' ? (
             <div className="max-w-7xl mx-auto">
               <HistoryTable
                 clients={clients}
                 onSelectClient={handleSelectClientHistory}
               />
+            </div>
+          ) : (
+            <div className="max-w-7xl mx-auto">
+              <PaymentLogsTable logs={paymentLogs} />
             </div>
           )}
         </main>
