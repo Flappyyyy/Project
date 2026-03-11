@@ -185,9 +185,10 @@ function App() {
     if (!client || client.status !== 'Paid') return;
 
     const newMonthsPaid = (client.monthsPaid || 0) + 1;
+    const isCompleted = newMonthsPaid >= (client.monthsToPay || 5);
     const resetPayment15 = { ...client.payment15, paid: false };
     const resetPayment30 = { ...client.payment30, paid: false };
-    const newStatus = "Completed";
+    const newStatus = isCompleted ? "Completed" : "Unpaid";
 
     setClients(prev => prev.map(c => c.id === clientId ? {
       ...c,
