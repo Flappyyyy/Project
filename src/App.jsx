@@ -45,12 +45,11 @@ function App() {
 
   // Dashboard & Logs row selection
   const [selectedDashboardClientId, setSelectedDashboardClientId] = useState(null);
-  const [selectedLogId, setSelectedLogId] = useState(null);
+  const [selectedLogIds, setSelectedLogIds] = useState([]);
   const [selectedHistoryIds, setSelectedHistoryIds] = useState([]);
 
   // Log Delete Modal state
   const [isDeleteLogModalOpen, setIsDeleteLogModalOpen] = useState(false);
-  const [logToDelete, setLogToDelete] = useState(null);
 
   // History Delete Modal state
   const [isDeleteHistoryModalOpen, setIsDeleteHistoryModalOpen] = useState(false);
@@ -332,18 +331,31 @@ function App() {
     }
   };
 
-  const handleDeleteLogRequest = (log) => {
-    setLogToDelete(log);
+  const handleSelectLogRow = (id) => {
+    setSelectedLogIds(prev =>
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
+
+  const handleSelectAllLogs = (ids, isSelected) => {
+    if (isSelected) {
+      const newIds = new Set([...selectedLogIds, ...ids]);
+      setSelectedLogIds(Array.from(newIds));
+    } else {
+      setSelectedLogIds(prev => prev.filter(id => !ids.includes(id)));
+    }
+  };
+
+  const handleDeleteLogRequest = () => {
     setIsDeleteLogModalOpen(true);
   };
 
   const handleConfirmDeleteLog = async () => {
-    if (logToDelete) {
-      setPaymentLogs(prev => prev.filter(l => l.id !== logToDelete.id));
+    if (selectedLogIds.length > 0) {
+      setPaymentLogs(prev => prev.filter(l => !selectedLogIds.includes(l.id)));
       setIsDeleteLogModalOpen(false);
-      await supabase.from('payment_logs').delete().eq('id', logToDelete.id);
-      if (selectedLogId === logToDelete.id) setSelectedLogId(null);
-      setLogToDelete(null);
+      await supabase.from('payment_logs').delete().in('id', selectedLogIds);
+      setSelectedLogIds([]);
     }
   };
 
@@ -515,13 +527,14 @@ function App() {
                 onExport={handleExportCSV}
                 showAddButton={false}
                 showEditButton={false}
-                selectedDashboardClient={paymentLogs.find(l => l.id === selectedLogId)}
-                onDeleteDashboardClient={() => paymentLogs.find(l => l.id === selectedLogId) && handleDeleteLogRequest(paymentLogs.find(l => l.id === selectedLogId))}
+                selectedDashboardClient={selectedLogIds.length > 0}
+                onDeleteDashboardClient={handleDeleteLogRequest}
               />
               <PaymentLogsTable
                 logs={filteredPaymentLogs}
-                selectedLogId={selectedLogId}
-                onSelectRow={setSelectedLogId}
+                selectedIds={selectedLogIds}
+                onSelectRow={handleSelectLogRow}
+                onSelectAll={handleSelectAllLogs}
               />
             </div>
           )}
@@ -546,7 +559,7 @@ function App() {
         isOpen={isDeleteLogModalOpen}
         onClose={() => setIsDeleteLogModalOpen(false)}
         onConfirm={handleConfirmDeleteLog}
-        clientName={`log for ${logToDelete?.client_name}`}
+        clientName={`${selectedLogIds.length} selected payment log(s)`}
       />
 
       <DeleteConfirmationModal

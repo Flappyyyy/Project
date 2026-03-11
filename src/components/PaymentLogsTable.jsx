@@ -1,7 +1,7 @@
 import React from 'react';
 import StatusBadge from './StatusBadge';
 
-const PaymentLogsTable = ({ logs, selectedLogId, onSelectRow }) => {
+const PaymentLogsTable = ({ logs, selectedIds = [], onSelectRow, onSelectAll }) => {
     return (
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
             <div className="p-6 border-b border-slate-200 flex justify-between items-center bg-white">
@@ -14,7 +14,14 @@ const PaymentLogsTable = ({ logs, selectedLogId, onSelectRow }) => {
                 <table className="w-full text-left text-sm text-slate-600">
                     <thead className="bg-pink-50 text-rose-900 font-semibold border-b border-pink-200">
                         <tr>
-                            <th className="px-6 py-4 whitespace-nowrap text-center">Select</th>
+                            <th className="px-6 py-4 whitespace-nowrap text-center">
+                                <input
+                                    type="checkbox"
+                                    className="w-4 h-4 text-rose-500 rounded border-pink-300 focus:ring-rose-500 cursor-pointer accent-rose-500"
+                                    checked={logs.length > 0 && selectedIds.length === logs.length}
+                                    onChange={(e) => onSelectAll(logs.map(l => l.id), e.target.checked)}
+                                />
+                            </th>
                             <th className="px-6 py-4 whitespace-nowrap text-center">Date Saved</th>
                             <th className="px-6 py-4 whitespace-nowrap text-center">Client Name</th>
                             <th className="px-6 py-4 whitespace-nowrap text-center">Item</th>
@@ -39,15 +46,14 @@ const PaymentLogsTable = ({ logs, selectedLogId, onSelectRow }) => {
                                 return (
                                     <tr
                                         key={log.id}
-                                        className={`hover:bg-pink-50/80 transition-colors ${selectedLogId === log.id ? 'bg-pink-100/60' : (index % 2 === 0 ? 'bg-white' : 'bg-pink-50/40')}`}
+                                        className={`hover:bg-pink-50/80 transition-colors ${selectedIds.includes(log.id) ? 'bg-pink-100/60' : (index % 2 === 0 ? 'bg-white' : 'bg-pink-50/40')}`}
                                     >
                                         <td className="px-6 py-4 whitespace-nowrap text-center">
                                             <input
-                                                type="radio"
-                                                name="logSelect"
-                                                checked={selectedLogId === log.id}
+                                                type="checkbox"
+                                                checked={selectedIds.includes(log.id)}
                                                 onChange={() => onSelectRow(log.id)}
-                                                className="w-4 h-4 text-rose-500 focus:ring-rose-500 cursor-pointer accent-rose-500"
+                                                className="w-4 h-4 text-rose-500 rounded border-pink-300 focus:ring-rose-500 cursor-pointer accent-rose-500"
                                             />
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-center text-slate-500">
