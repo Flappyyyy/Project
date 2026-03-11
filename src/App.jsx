@@ -44,6 +44,11 @@ function App() {
 
   // Dashboard row selection
   const [selectedDashboardClientId, setSelectedDashboardClientId] = useState(null);
+  const [selectedLogId, setSelectedLogId] = useState(null);
+
+  // Log Delete Modal state
+  const [isDeleteLogModalOpen, setIsDeleteLogModalOpen] = useState(false);
+  const [logToDelete, setLogToDelete] = useState(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -278,7 +283,21 @@ function App() {
         setSelectedDashboardClientId(null);
       }
 
-      setClientToDelete(null);
+    }
+  };
+
+  const handleDeleteLogRequest = (log) => {
+    setLogToDelete(log);
+    setIsDeleteLogModalOpen(true);
+  };
+
+  const handleConfirmDeleteLog = async () => {
+    if (logToDelete) {
+      setPaymentLogs(prev => prev.filter(l => l.id !== logToDelete.id));
+      setIsDeleteLogModalOpen(false);
+      await supabase.from('payment_logs').delete().eq('id', logToDelete.id);
+      if (selectedLogId === logToDelete.id) setSelectedLogId(null);
+      setLogToDelete(null);
     }
   };
 
@@ -428,8 +447,15 @@ function App() {
                 setMonthFilter={setMonthFilter}
                 onExport={handleExportCSV}
                 showAddButton={false}
+                showEditButton={false}
+                selectedDashboardClient={paymentLogs.find(l => l.id === selectedLogId)}
+                onDeleteDashboardClient={() => paymentLogs.find(l => l.id === selectedLogId) && handleDeleteLogRequest(paymentLogs.find(l => l.id === selectedLogId))}
               />
-              <PaymentLogsTable logs={filteredPaymentLogs} />
+              <PaymentLogsTable
+                logs={filteredPaymentLogs}
+                selectedLogId={selectedLogId}
+                onSelectRow={setSelectedLogId}
+              />
             </div>
           )}
         </main>
@@ -447,6 +473,13 @@ function App() {
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleConfirmDelete}
         clientName={clientToDelete?.name}
+      />
+
+      <DeleteConfirmationModal
+        isOpen={isDeleteLogModalOpen}
+        onClose={() => setIsDeleteLogModalOpen(false)}
+        onConfirm={handleConfirmDeleteLog}
+        clientName={`log for ${logToDelete?.client_name}`}
       />
 
       <ClientDetailsModal

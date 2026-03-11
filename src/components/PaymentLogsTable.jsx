@@ -1,7 +1,7 @@
 import React from 'react';
 import StatusBadge from './StatusBadge';
 
-const PaymentLogsTable = ({ logs }) => {
+const PaymentLogsTable = ({ logs, selectedLogId, onSelectRow }) => {
     return (
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
             <div className="p-6 border-b border-slate-200 flex justify-between items-center bg-white">
@@ -14,6 +14,7 @@ const PaymentLogsTable = ({ logs }) => {
                 <table className="w-full text-left text-sm text-slate-600">
                     <thead className="bg-pink-50 text-rose-900 font-semibold border-b border-pink-200">
                         <tr>
+                            <th className="px-6 py-4 whitespace-nowrap text-center">Select</th>
                             <th className="px-6 py-4 whitespace-nowrap text-center">Date Saved</th>
                             <th className="px-6 py-4 whitespace-nowrap text-center">Client Name</th>
                             <th className="px-6 py-4 whitespace-nowrap text-center">Item</th>
@@ -27,7 +28,7 @@ const PaymentLogsTable = ({ logs }) => {
                     <tbody className="divide-y divide-slate-200">
                         {logs.length === 0 ? (
                             <tr>
-                                <td colSpan="8" className="px-6 py-12 text-center text-slate-500">
+                                <td colSpan="9" className="px-6 py-12 text-center text-slate-500">
                                     No payment logs found.
                                 </td>
                             </tr>
@@ -36,7 +37,19 @@ const PaymentLogsTable = ({ logs }) => {
                                 const total = (log.payment15_amount?.amount || 0) + (log.payment30_amount?.amount || 0);
 
                                 return (
-                                    <tr key={log.id} className={`hover:bg-pink-50/80 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-pink-50/40'}`}>
+                                    <tr
+                                        key={log.id}
+                                        className={`hover:bg-pink-50/80 transition-colors ${selectedLogId === log.id ? 'bg-pink-100/60' : (index % 2 === 0 ? 'bg-white' : 'bg-pink-50/40')}`}
+                                    >
+                                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                                            <input
+                                                type="radio"
+                                                name="logSelect"
+                                                checked={selectedLogId === log.id}
+                                                onChange={() => onSelectRow(log.id)}
+                                                className="w-4 h-4 text-rose-500 focus:ring-rose-500 cursor-pointer accent-rose-500"
+                                            />
+                                        </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-center text-slate-500">
                                             {new Date(log.date_saved).toLocaleDateString()}
                                         </td>

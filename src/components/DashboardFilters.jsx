@@ -11,7 +11,9 @@ const DashboardFilters = ({
     selectedDashboardClient,
     onEditDashboardClient,
     onDeleteDashboardClient,
-    showAddButton = true
+    showAddButton = true,
+    showEditButton = true,
+    showDeleteButton = true
 }) => {
     const months = [
         "All Months", "January", "February", "March", "April", "May", "June",
@@ -55,18 +57,22 @@ const DashboardFilters = ({
             <div className="flex gap-3 w-full sm:w-auto">
                 {selectedDashboardClient && (
                     <>
-                        <button
-                            onClick={onEditDashboardClient}
-                            className="flex items-center gap-2 px-4 py-2 bg-pink-50 text-rose-600 border border-pink-200 rounded-lg text-sm font-medium hover:bg-pink-100 transition-colors"
-                        >
-                            Edit Selected
-                        </button>
-                        <button
-                            onClick={onDeleteDashboardClient}
-                            className="flex items-center gap-2 px-4 py-2 bg-rose-50 text-rose-600 border border-rose-200 rounded-lg text-sm font-medium hover:bg-rose-100 transition-colors"
-                        >
-                            Delete Selected
-                        </button>
+                        {showEditButton && (
+                            <button
+                                onClick={onEditDashboardClient}
+                                className="flex items-center gap-2 px-4 py-2 bg-pink-50 text-rose-600 border border-pink-200 rounded-lg text-sm font-medium hover:bg-pink-100 transition-colors"
+                            >
+                                Edit Selected
+                            </button>
+                        )}
+                        {showDeleteButton && (
+                            <button
+                                onClick={onDeleteDashboardClient}
+                                className="flex items-center gap-2 px-4 py-2 bg-rose-50 text-rose-600 border border-rose-200 rounded-lg text-sm font-medium hover:bg-rose-100 transition-colors"
+                            >
+                                Delete Selected
+                            </button>
+                        )}
                     </>
                 )}
                 <button
