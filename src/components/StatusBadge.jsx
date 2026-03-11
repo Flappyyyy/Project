@@ -7,6 +7,9 @@ const StatusBadge = ({ status }) => {
     if (status === "Paid") {
         badgeStyle = "bg-emerald-50 text-emerald-700 border-emerald-200";
         icon = "✅";
+    } else if (status === "Completed") {
+        badgeStyle = "bg-purple-50 text-purple-700 border-purple-200";
+        icon = "🏁";
     } else if (status === "Partially Paid") {
         badgeStyle = "bg-amber-50 text-amber-700 border-amber-200";
         icon = "⚠️";

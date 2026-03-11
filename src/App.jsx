@@ -95,8 +95,8 @@ function App() {
   // Filter clients based on search and month
   const filteredClients = useMemo(() => {
     return clients.filter(client => {
-      // Archive fully paid clients from the Active Dashboard view
-      if (client.monthsPaid >= (client.monthsToPay || 5)) return false;
+      // Archive fully completed clients from the Active Dashboard view
+      if (client.status === 'Completed') return false;
 
       const matchesSearch = client.name.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesMonth = monthFilter === 'All Months' || client.month === monthFilter;
@@ -153,10 +153,9 @@ function App() {
     if (!client || client.status !== 'Paid') return;
 
     const newMonthsPaid = (client.monthsPaid || 0) + 1;
-    const isCompleted = newMonthsPaid >= (client.monthsToPay || 5);
     const resetPayment15 = { ...client.payment15, paid: false };
     const resetPayment30 = { ...client.payment30, paid: false };
-    const newStatus = isCompleted ? "Completed" : "Unpaid";
+    const newStatus = "Completed";
 
     setClients(prev => prev.map(c => c.id === clientId ? {
       ...c,
